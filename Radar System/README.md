@@ -159,7 +159,5 @@ Add project images below:
 
 **Santos**
 
-ECE Student | Embedded Systems | FPGA | AI | Robotics | Semiconductor Technology
-
 ---
-*"Turning ideas into real-world engineering projects."*
+
