@@ -1,7 +1,7 @@
-Arduino Radar System
+Radar System
 
 📌 Title
-Arduino Radar System Using Ultrasonic Sensor and Servo Motor
+Radar System Using Ultrasonic Sensor and Servo Motor
 
 A radar-inspired object detection system that uses an ultrasonic sensor mounted on a servo motor to scan the surrounding area and measure the distance of nearby objects. The system continuously rotates the sensor, detects obstacles, and provides real-time distance measurements.
 
