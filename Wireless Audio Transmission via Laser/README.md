@@ -48,17 +48,20 @@ A wireless communication system that transmits audio signals through a laser bea
 
 ---
 
-## ⌨️ Keyboard Shortcuts
+## 🎛️ Controls
 
 ### Documentation & Development
 
-| Shortcut | Function |
-|-----------|-----------|
-| Ctrl + C | Copy |
-| Ctrl + V | Paste |
-| Ctrl + S | Save |
-| Ctrl + Z | Undo |
-| Ctrl + Shift + S | Save As |
+| Action | Purpose |
+|----------|----------|
+| Power ON | Activates the transmitter and receiver circuits |
+| Power OFF | Safely shuts down the system |
+| Adjust Potentiometer | Controls audio signal sensitivity |
+| Align Laser Beam | Ensures proper signal transmission |
+| Position Solar Panel | Maximizes signal reception |
+| Play Audio Input | Sends voice or music through the laser link |
+| Adjust Speaker Volume | Controls output sound level |
+| Modify Distance | Tests communication range and performance |
 
 ---
 
