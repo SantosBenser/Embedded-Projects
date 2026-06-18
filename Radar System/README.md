@@ -129,32 +129,6 @@ This project helped me gain practical experience in embedded systems and electro
 
 ---
 
-## 🎥 Video
-
-### Project Demonstration
-
-Add your project demonstration video here:
-
-- YouTube Link
-- Google Drive Link
-- GitHub Video Upload
-
-Example:
-
-[Watch Project Demo](YOUR_VIDEO_LINK_HERE)
-
----
-
-### 📷 Project Images
-
-Add project images below:
-
-![Circuit Setup](images/setup.jpg)
-
-![Working Model](images/working.jpg)
-
----
-
 ## 👨‍💻 Author
 
 **Santos**
