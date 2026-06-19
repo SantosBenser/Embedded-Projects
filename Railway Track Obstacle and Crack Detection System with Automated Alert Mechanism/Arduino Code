@@ -1,0 +1,196 @@
+#include <LiquidCrystal.h>
+#include <SoftwareSerial.h>
+#include <TinyGPS++.h>
+
+// LCD
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+// Ultrasonic
+#define trigPin 9
+#define echoPin 10
+
+// LDR
+#define ldrPin A2
+
+// Buzzer
+#define buzzer 7
+
+// GSM (TX-6, RX-13)
+SoftwareSerial gsm(6, 13);
+
+// GPS (TX-A0, RX-A1)
+SoftwareSerial gpsSerial(A0, A1);
+TinyGPSPlus gps;
+
+float normalDistance = 5;
+float crackThreshold = 0.8;
+
+bool alertSent = false;
+
+void setup() {
+
+  Serial.begin(9600);
+  gsm.begin(9600);
+  gpsSerial.begin(9600);
+
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(buzzer, OUTPUT);
+
+  digitalWrite(buzzer, LOW);
+
+  lcd.begin(16, 2);
+  lcd.print("Railway Safety");
+  delay(2000);
+  lcd.clear();
+
+  Serial.println("==== Railway Safety System Started ====");
+}
+
+void loop() {
+
+  while (gpsSerial.available()) {
+    gps.encode(gpsSerial.read());
+  }
+
+  float distance = getDistance();
+  int ldrValue = analogRead(ldrPin);
+
+  // ===== SERIAL MONITOR =====
+  Serial.println("----------------------------------");
+  Serial.print("Ultrasonic Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  Serial.print("LDR Value: ");
+  Serial.println(ldrValue);
+
+  // ===== LCD FIRST ROW =====
+  lcd.setCursor(0, 0);
+  lcd.print("D:");
+  lcd.print(distance, 1);
+  lcd.print(" L:");
+  lcd.print(ldrValue);
+  lcd.print("   ");
+
+  // ---- OBSTACLE DETECTION ----
+  if (ldrValue > 900) {
+
+    digitalWrite(buzzer, HIGH);
+
+    Serial.println("Status: Obstacle Detected");
+
+    lcd.setCursor(0, 1);
+    lcd.print("Obstacle Detected ");
+
+    if (!alertSent) {
+      sendEmergencyAlert();
+      lcd.setCursor(0, 1);
+      lcd.print("SMS Sent -Obstacle");
+      alertSent = true;
+      delay(2000);
+    }
+  }
+
+  // ---- CRACK DETECTION ----
+  else if ((distance - normalDistance) > crackThreshold) {
+
+    digitalWrite(buzzer, HIGH);
+
+    Serial.println("Status: Crack Detected");
+
+    lcd.setCursor(0, 1);
+    lcd.print("Crack Detected    ");
+
+    if (!alertSent) {
+      sendEmergencyAlert();
+      lcd.setCursor(0, 1);
+      lcd.print("SMS Sent - Crack  ");
+      alertSent = true;
+      delay(2000);
+    }
+  }
+
+  // ---- NORMAL CONDITION ----
+  else {
+
+    digitalWrite(buzzer, LOW);
+    alertSent = false;
+
+    Serial.println("Status: Track Normal");
+
+    lcd.setCursor(0, 1);
+    lcd.print("Track Normal      ");
+  }
+
+  delay(1000);
+}
+
+// -------- ULTRASONIC FUNCTION --------
+float getDistance() {
+
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH);
+  float distance = duration * 0.034 / 2;
+
+  return distance;
+}
+
+// -------- SMS FUNCTION --------
+void sendEmergencyAlert() {
+
+  Serial.println("Sending Emergency Alert SMS...");
+
+  // First SMS
+  gsm.println("AT+CMGF=1");
+  delay(1000);
+
+  gsm.println("AT+CMGS=\"+918098108400\"");  
+  delay(1000);
+
+  gsm.println("Emergency Alert!");
+  gsm.println("https://maps.app.goo.gl/y6j6Pq2RkPiiTGsz7");
+  gsm.write(26);
+  delay(3000);
+
+  Serial.println("Emergency Alert SMS Sent");
+
+  // Second SMS (Location or Not Available)
+  gsm.println("AT+CMGF=1");
+  delay(1000);
+
+  gsm.println("AT+CMGS=\"+918098108400\"");
+  delay(1000);
+
+  if (gps.location.isValid()) {
+
+    float latitude = gps.location.lat();
+    float longitude = gps.location.lng();
+    gsm.print("https://maps.app.goo.gl/y6j6Pq2RkPiiTGsz7");
+    gsm.print("Location:\n");
+    gsm.print("Lat: ");
+    gsm.print(latitude, 6);
+    gsm.print("\nLng: ");
+    gsm.print(longitude, 6);
+    gsm.print("\nMaps: https://maps.google.com/?q=");
+    gsm.print(latitude, 6);
+    gsm.print(",");
+    gsm.print(longitude, 6);
+
+    Serial.println("Location Sent Successfully");
+
+  } else {
+
+    gsm.print("https://maps.app.goo.gl/y6j6Pq2RkPiiTGsz7");
+    Serial.println("Location Available - SMS Sent");
+  }
+
+  gsm.write(26);
+  delay(3000);
+}
