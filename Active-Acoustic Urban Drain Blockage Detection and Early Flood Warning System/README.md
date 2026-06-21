@@ -115,7 +115,7 @@ Flow Rate < Threshold
 
 the system suspects restricted water movement.
 
-Pressure buildup and reduced flow are strong indicators of drain obstruction. :contentReference[oaicite:0]{index=0}
+Pressure buildup and reduced flow are strong indicators of drain obstruction. 
 
 ---
 
@@ -129,7 +129,7 @@ The system combines:
 
 to improve reliability and reduce false alarms.
 
-If multiple sensors indicate abnormal conditions, the likelihood of blockage increases. :contentReference[oaicite:1]{index=1}
+If multiple sensors indicate abnormal conditions, the likelihood of blockage increases.
 
 ---
 
@@ -143,7 +143,7 @@ If water depth exceeds the flood threshold:
 State = Critical Flood
 ```
 
-Immediate action is triggered. :contentReference[oaicite:2]{index=2}
+Immediate action is triggered.
 
 ---
 
@@ -169,13 +169,13 @@ Flow ↓ OR Pressure ↑
 No abnormal sensor conditions
 ```
 
-The system automatically classifies the drainage condition accordingly. :contentReference[oaicite:3]{index=3} :contentReference[oaicite:4]{index=4}
+The system automatically classifies the drainage condition accordingly.
 
 ---
 
 ### 6. Machine Learning Verification
 
-A Random Forest-based machine learning model verifies the rule-based classification using historical drainage behavior and real-time sensor data. This improves accuracy and minimizes false positives. :contentReference[oaicite:5]{index=5} :contentReference[oaicite:6]{index=6}
+A Random Forest-based machine learning model verifies the rule-based classification using historical drainage behavior and real-time sensor data. This improves accuracy and minimizes false positives.
 
 ---
 
@@ -195,7 +195,7 @@ Based on severity levels:
 #### Normal
 - Safe operation
 
-The system automatically selects the appropriate response level. :contentReference[oaicite:7]{index=7} :contentReference[oaicite:8]{index=8}
+The system automatically selects the appropriate response level.
 
 ---
 
@@ -214,7 +214,7 @@ Alert messages contain:
 - Location information
 - Timestamp
 
-for rapid response. :contentReference[oaicite:9]{index=9} :contentReference[oaicite:10]{index=10}
+for rapid response.
 
 ---
 
@@ -226,7 +226,7 @@ When abnormal conditions are detected:
 - Buzzer activates
 - Visual and audible alerts are generated
 
-for immediate on-site awareness. :contentReference[oaicite:11]{index=11}
+for immediate on-site awareness.
 
 ---
 
