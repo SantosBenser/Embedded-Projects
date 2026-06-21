@@ -1,0 +1,134 @@
+// ===================== PIN DEFINITIONS =====================
+const int pressurePin = 34;     // ADC pin
+#define FLOW_SENSOR_PIN 27
+
+// ===================== FLOW VARIABLES =====================
+volatile int pulseCount = 0;
+float flowRate = 0.0;
+unsigned long lastFlowTime = 0;
+
+// ===================== PRESSURE TIMING =====================
+unsigned long lastPressureTime = 0;
+
+// ===================== CONSTANTS =====================
+const float Vs = 5.0;          // Sensor supply voltage
+const float rho = 1000.0;      // Water density (kg/m^3)
+const float g = 9.81;          // Gravity
+
+// ===================== THRESHOLDS =====================
+const float pressureThreshold = 0.22;   // kPa
+const float flowThreshold = 5.5;        // L/min
+
+// ===================== INTERRUPT =====================
+void IRAM_ATTR pulseCounter() {
+  pulseCount++;
+}
+
+// ===================== READ PRESSURE SENSOR =====================
+float readPressureSensorVoltage() {
+  int samples = 50;
+  long sum = 0;
+
+  for (int i = 0; i < samples; i++) {
+    sum += analogRead(pressurePin);
+    delay(2);
+  }
+
+  float avg = sum / (float)samples;
+  float v_adc = (avg / 4095.0) * 3.3;  // After voltage divider
+
+  // Step 1: Undo voltage divider (10k-10k → ×2)
+  float v_collector = v_adc * 2.0;
+
+  // Step 2: Convert transistor output → original sensor voltage
+  // Linear mapping:
+  // 4.25V → 0.20V
+  // 3.50V → 0.40V
+
+  float v_sensor = ((4.25 - v_collector) * (0.40 - 0.20) / (4.25 - 3.50)) + 0.20;
+
+  return v_sensor;
+}
+
+// ===================== SETUP =====================
+void setup() {
+  Serial.begin(115200);
+
+  analogSetPinAttenuation(pressurePin, ADC_0db);
+
+  pinMode(FLOW_SENSOR_PIN, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(FLOW_SENSOR_PIN), pulseCounter, FALLING);
+
+  lastFlowTime = millis();
+  lastPressureTime = millis();
+}
+
+// ===================== LOOP =====================
+void loop() {
+
+  float pressure = 0;
+  float height = 0;
+
+  // ===== PRESSURE UPDATE EVERY 1 SECOND =====
+  if (millis() - lastPressureTime >= 1000) {
+
+    float voltage = readPressureSensorVoltage();
+
+    // Convert voltage → pressure (kPa)
+    pressure = ((voltage / Vs) - 0.04) / 0.09;
+
+    // Convert pressure → height (meters)
+    height = (pressure * 1000) / (rho * g);
+
+    Serial.println("------ PRESSURE DATA ------");
+    Serial.print("Sensor Voltage: ");
+    Serial.print(voltage, 3);
+    Serial.println(" V");
+
+    Serial.print("Pressure: ");
+    Serial.print(pressure, 3);
+    Serial.println(" kPa");
+
+    Serial.print("Water Height: ");
+    Serial.print(height, 3);
+    Serial.println(" m");
+
+    lastPressureTime = millis();
+  }
+
+  // ===== FLOW UPDATE EVERY 1 SECOND =====
+  if (millis() - lastFlowTime >= 1000) {
+
+    detachInterrupt(digitalPinToInterrupt(FLOW_SENSOR_PIN));
+
+    flowRate = pulseCount / 7.5;
+
+    Serial.println("------ FLOW DATA ------");
+    Serial.print("Flow Rate: ");
+    Serial.print(flowRate);
+    Serial.println(" L/min");
+
+    // ===== SYSTEM DECISION =====
+    Serial.println("------ SYSTEM STATUS ------");
+
+    if (flowRate < flowThreshold && pressure > pressureThreshold) {
+      Serial.println("🚨 BLOCKAGE CONFIRMED");
+    }
+    else if (flowRate < flowThreshold || pressure > pressureThreshold) {
+      Serial.println("⚠ WARNING: POSSIBLE BLOCKAGE");
+    }
+    else {
+      Serial.println("✅ NORMAL FLOW");
+    }
+
+    Serial.println("-----------------------------\n");
+
+    pulseCount = 0;
+    lastFlowTime = millis();
+
+    attachInterrupt(digitalPinToInterrupt(FLOW_SENSOR_PIN), pulseCounter, FALLING);
+  }
+
+  // ===== SMALL DELAY FOR STABILITY =====
+  delay(200);
+}
